@@ -98,7 +98,6 @@ No database-per-tenant strategy at this stage.
 - Local Postgres
 - JetBrains PHPStorm + DataGrip
 - Claude Code
-- Docker Compose
 - GitHub Actions (CI)
 - ESLint + Prettier
 - PHP CS Fixer
