@@ -54,6 +54,7 @@ jobs:
 
       - name: Configure test environment
         run: |
+          sed -i 's/APP_ENV=.*/APP_ENV=testing/' .env.testing
           sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env.testing
           sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env.testing
           sed -i 's/DB_PORT=.*/DB_PORT=5432/' .env.testing
