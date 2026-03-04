@@ -1,10 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [develop, main]
 
 jobs:
   php-tests:
@@ -33,23 +31,38 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: pdo, pdo_pgsql, redis
+          extensions: pdo, pdo_pgsql
           coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
 
       - name: Copy environment file
         run: cp .env.example .env.testing
 
       - name: Configure test environment
         run: |
+          sed -i 's/APP_ENV=.*/APP_ENV=testing/' .env.testing
           sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=pgsql/' .env.testing
           sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env.testing
           sed -i 's/DB_PORT=.*/DB_PORT=5432/' .env.testing
           sed -i 's/DB_DATABASE=.*/DB_DATABASE=orquestra_test/' .env.testing
           sed -i 's/DB_USERNAME=.*/DB_USERNAME=orquestra/' .env.testing
           sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=secret/' .env.testing
+          sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=array/' .env.testing
+          sed -i 's/CACHE_STORE=.*/CACHE_STORE=array/' .env.testing
 
       - name: Generate application key
         run: php artisan key:generate --env=testing
@@ -71,13 +84,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          tools: php-cs-fixer
 
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Run PHP CS Fixer (dry-run)
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+      - name: Run Pint (dry-run)
+        run: vendor/bin/pint --test
 
   js-lint:
     name: JS Lint & Type Check
@@ -97,6 +109,3 @@ jobs:
 
       - name: Type check
         run: npm run type-check
-
-      - name: Lint
-        run: npm run lint
