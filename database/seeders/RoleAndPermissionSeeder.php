@@ -15,6 +15,9 @@ class RoleAndPermissionSeeder extends Seeder
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Ensure global context: all role definitions use team_id = null.
+        setPermissionsTeamId(null);
+
         $permissions = collect(PermissionName::cases())
             ->map(fn (PermissionName $p) => Permission::firstOrCreate(['name' => $p->value]));
 
@@ -50,16 +53,11 @@ class RoleAndPermissionSeeder extends Seeder
             PermissionName::ViewDecision->value,
         ];
 
-        Role::firstOrCreate(['name' => RoleName::Admin->value])
-            ->syncPermissions($allPermissions);
-
-        Role::firstOrCreate(['name' => RoleName::WorkspaceOwner->value])
-            ->syncPermissions($ownerPermissions);
-
-        Role::firstOrCreate(['name' => RoleName::WorkspaceMember->value])
-            ->syncPermissions($memberPermissions);
-
-        Role::firstOrCreate(['name' => RoleName::WorkspaceViewer->value])
-            ->syncPermissions($viewerPermissions);
+        // Roles are defined globally (team_id = null) and shared across workspaces.
+        // User-role assignments in model_has_roles carry the team_id (workspace or 0 for global).
+        Role::findOrCreate(RoleName::Admin->value)->syncPermissions($allPermissions);
+        Role::findOrCreate(RoleName::WorkspaceOwner->value)->syncPermissions($ownerPermissions);
+        Role::findOrCreate(RoleName::WorkspaceMember->value)->syncPermissions($memberPermissions);
+        Role::findOrCreate(RoleName::WorkspaceViewer->value)->syncPermissions($viewerPermissions);
     }
 }
