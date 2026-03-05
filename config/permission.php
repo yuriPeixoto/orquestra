@@ -131,10 +131,9 @@ return [
      * (view the latest version of this package's migration file)
      */
 
-    // Teams mode will be enabled in issue #3 (Workspaces) when workspace_id is available as team_id.
-    // Enabling it now would require a non-null team_id on every role assignment, which is not
-    // possible without the Workspace entity.
-    'teams' => false,
+    // Teams mode enabled: workspace_id is used as team_id for workspace-scoped roles.
+    // Global roles (e.g. admin) are assigned with team_id = 0 (setPermissionsTeamId(0)).
+    'teams' => true,
 
     /*
      * The class to use to resolve the permissions team id

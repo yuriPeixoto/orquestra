@@ -5,12 +5,18 @@ use App\Modules\Auth\Domain\Enums\PermissionName;
 use App\Modules\Auth\Domain\Enums\RoleName;
 use Spatie\Permission\PermissionRegistrar;
 
+// Team ID conventions used in tests:
+//   0   → global context (admin role, platform-level operations)
+//   1   → simulated workspace context (workspace-scoped roles)
+
 beforeEach(function (): void {
     app()[PermissionRegistrar::class]->forgetCachedPermissions();
+    setPermissionsTeamId(null);
     $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
 });
 
 test('user can be assigned a role', function (): void {
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceMember->value);
 
@@ -18,6 +24,7 @@ test('user can be assigned a role', function (): void {
 });
 
 test('admin has all permissions', function (): void {
+    setPermissionsTeamId(0);
     $user = User::factory()->create();
     $user->assignRole(RoleName::Admin->value);
 
@@ -28,6 +35,7 @@ test('admin has all permissions', function (): void {
 });
 
 test('workspace_owner has management permissions but not manage_platform', function (): void {
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceOwner->value);
 
@@ -38,6 +46,7 @@ test('workspace_owner has management permissions but not manage_platform', funct
 });
 
 test('workspace_member can create and edit but not manage workspace', function (): void {
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceMember->value);
 
@@ -48,6 +57,7 @@ test('workspace_member can create and edit but not manage workspace', function (
 });
 
 test('workspace_viewer has only view permissions', function (): void {
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceViewer->value);
 
@@ -61,6 +71,7 @@ test('route protected by role middleware returns 403 for user without role', fun
     Route::get('/test-admin-only', fn () => response('ok'))
         ->middleware(['web', 'role:admin']);
 
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceMember->value);
 
@@ -71,6 +82,7 @@ test('route protected by role middleware passes for user with role', function ()
     Route::get('/test-admin-pass', fn () => response('ok'))
         ->middleware(['web', 'role:admin']);
 
+    setPermissionsTeamId(0);
     $user = User::factory()->create();
     $user->assignRole(RoleName::Admin->value);
 
@@ -81,6 +93,7 @@ test('route protected by permission middleware returns 403 without permission', 
     Route::get('/test-permission', fn () => response('ok'))
         ->middleware(['web', 'permission:manage_platform']);
 
+    setPermissionsTeamId(1);
     $user = User::factory()->create();
     $user->assignRole(RoleName::WorkspaceViewer->value);
 
