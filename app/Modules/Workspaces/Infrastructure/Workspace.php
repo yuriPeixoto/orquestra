@@ -3,6 +3,8 @@
 namespace App\Modules\Workspaces\Infrastructure;
 
 use App\Models\User;
+use Database\Factories\WorkspaceFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +19,11 @@ class Workspace extends Model
         'slug',
         'owner_id',
     ];
+
+    protected static function newFactory(): Factory
+    {
+        return WorkspaceFactory::new();
+    }
 
     public function owner(): BelongsTo
     {
