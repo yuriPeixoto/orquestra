@@ -3,6 +3,7 @@
 namespace App\Modules\Workspaces\Infrastructure;
 
 use App\Models\User;
+use App\Modules\Initiatives\Infrastructure\Initiative;
 use App\Modules\Teams\Infrastructure\Team;
 use Database\Factories\WorkspaceFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -35,5 +36,10 @@ class Workspace extends Model
     public function teams(): HasMany
     {
         return $this->hasMany(Team::class);
+    }
+
+    public function initiatives(): HasMany
+    {
+        return $this->hasMany(Initiative::class);
     }
 }
