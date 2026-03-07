@@ -120,7 +120,7 @@ class InitiativeController extends Controller
         abort_unless($request->user()->can('edit_initiative'), 403);
 
         $request->validate([
-            'status' => ['required', 'string', 'in:' . implode(',', array_column(InitiativeStatus::cases(), 'value'))],
+            'status' => ['required', 'string', 'in:'.implode(',', array_column(InitiativeStatus::cases(), 'value'))],
         ]);
 
         $updated = $action->execute($initiative, InitiativeStatus::from($request->string('status')->toString()));
