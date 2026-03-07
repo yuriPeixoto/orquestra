@@ -3,6 +3,7 @@
 namespace App\Modules\Initiatives\Infrastructure;
 
 use App\Models\User;
+use App\Modules\Decisions\Infrastructure\Decision;
 use App\Modules\Initiatives\Domain\Enums\InitiativeStatus;
 use App\Modules\Workspaces\Domain\Traits\BelongsToWorkspace;
 use App\Modules\Workspaces\Infrastructure\Workspace;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Initiative extends Model
 {
@@ -44,5 +46,10 @@ class Initiative extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function decisions(): HasMany
+    {
+        return $this->hasMany(Decision::class);
     }
 }
