@@ -12,6 +12,11 @@ use Inertia\Response;
 
 class WorkspaceController extends Controller
 {
+    public function create(): Response
+    {
+        return Inertia::render('Workspaces/Create');
+    }
+
     public function store(CreateWorkspaceRequest $request, CreateWorkspace $action): RedirectResponse
     {
         $workspace = $action->execute(
