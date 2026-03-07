@@ -63,9 +63,12 @@ class InitiativeController extends Controller
     {
         abort_unless($initiative->workspace_id === $workspace->id, 404);
 
+        $decisions = $initiative->decisions()->with('author')->latest()->get();
+
         return Inertia::render('Initiatives/Show', [
             'workspace' => $workspace,
             'initiative' => $initiative->load('owner'),
+            'decisions' => $decisions,
         ]);
     }
 
