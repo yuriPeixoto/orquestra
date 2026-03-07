@@ -91,7 +91,7 @@ function EmptyState({ workspaceId }: { workspaceId?: number }) {
                 Create a workspace to start organizing your team&apos;s work.
             </p>
             <Link
-                href={route('workspaces.store')}
+                href={route('workspaces.create')}
                 className="mt-6 cursor-pointer rounded-md bg-[#0369A1] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0284C7] focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:ring-offset-2"
             >
                 Create workspace
