@@ -21,3 +21,4 @@ require __DIR__.'/auth.php';
 require app_path('Modules/Workspaces/Interfaces/routes.php');
 require app_path('Modules/Teams/Interfaces/routes.php');
 require app_path('Modules/Initiatives/Interfaces/routes.php');
+require app_path('Modules/Decisions/Interfaces/routes.php');
