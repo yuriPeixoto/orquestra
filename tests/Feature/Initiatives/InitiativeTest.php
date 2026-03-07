@@ -4,6 +4,7 @@ use App\Models\User;
 use App\Modules\Auth\Domain\Enums\RoleName;
 use App\Modules\Initiatives\Application\Actions\CreateInitiative;
 use App\Modules\Initiatives\Application\Actions\UpdateInitiative;
+use App\Modules\Initiatives\Application\Actions\UpdateInitiativeStatus;
 use App\Modules\Initiatives\Domain\Enums\InitiativeStatus;
 use App\Modules\Initiatives\Infrastructure\Initiative;
 use App\Modules\Workspaces\Application\Actions\CreateWorkspace;
@@ -134,4 +135,64 @@ test('title is required', function (): void {
     $this->actingAs($owner)
         ->post("/workspaces/{$workspace->id}/initiatives", ['title' => ''])
         ->assertSessionHasErrors('title');
+});
+
+test('initiative status can be updated via action', function (): void {
+    $owner = User::factory()->create();
+    $workspace = app(CreateWorkspace::class)->execute($owner, 'Acme Corp');
+
+    setPermissionsTeamId($workspace->id);
+    $initiative = app(CreateInitiative::class)->execute($workspace, $owner, 'Draft Initiative');
+
+    $updated = app(UpdateInitiativeStatus::class)->execute($initiative, InitiativeStatus::Active);
+
+    expect($updated->status)->toBe(InitiativeStatus::Active);
+});
+
+test('workspace member can update initiative status via PATCH', function (): void {
+    $owner = User::factory()->create();
+    $workspace = app(CreateWorkspace::class)->execute($owner, 'Acme Corp');
+
+    setPermissionsTeamId($workspace->id);
+    $initiative = app(CreateInitiative::class)->execute($workspace, $owner, 'Kanban Item');
+
+    $this->actingAs($owner)
+        ->patch("/workspaces/{$workspace->id}/initiatives/{$initiative->id}/status", [
+            'status' => 'active',
+        ])
+        ->assertOk()
+        ->assertJson(['status' => 'active']);
+
+    expect($initiative->fresh()->status)->toBe(InitiativeStatus::Active);
+});
+
+test('kanban view returns initiatives grouped by status', function (): void {
+    $owner = User::factory()->create();
+    $workspace = app(CreateWorkspace::class)->execute($owner, 'Acme Corp');
+
+    setPermissionsTeamId($workspace->id);
+    app(CreateInitiative::class)->execute($workspace, $owner, 'Draft Initiative');
+    $active = app(CreateInitiative::class)->execute($workspace, $owner, 'Active Initiative');
+    app(UpdateInitiativeStatus::class)->execute($active, InitiativeStatus::Active);
+
+    $this->actingAs($owner)
+        ->get("/workspaces/{$workspace->id}/initiatives/kanban")
+        ->assertOk();
+});
+
+test('workspace viewer cannot update initiative status', function (): void {
+    $owner = User::factory()->create();
+    $workspace = app(CreateWorkspace::class)->execute($owner, 'Acme Corp');
+
+    setPermissionsTeamId($workspace->id);
+    $initiative = app(CreateInitiative::class)->execute($workspace, $owner, 'Some Initiative');
+
+    $viewer = User::factory()->create();
+    $viewer->assignRole(RoleName::WorkspaceViewer->value);
+
+    $this->actingAs($viewer)
+        ->patch("/workspaces/{$workspace->id}/initiatives/{$initiative->id}/status", [
+            'status' => 'active',
+        ])
+        ->assertForbidden();
 });
