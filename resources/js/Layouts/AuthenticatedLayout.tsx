@@ -1,179 +1,307 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
+import { Link, router, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
-export default function Authenticated({
+type SharedProps = PageProps<{
+    currentWorkspace: { id: number; name: string; slug: string } | null;
+}>;
+
+interface NavItem {
+    label: string;
+    href: string;
+    routePattern: string;
+    icon: ReactNode;
+}
+
+function IconHome() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+    );
+}
+
+function IconList() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <line x1="8" y1="6" x2="21" y2="6" />
+            <line x1="8" y1="12" x2="21" y2="12" />
+            <line x1="8" y1="18" x2="21" y2="18" />
+            <line x1="3" y1="6" x2="3.01" y2="6" />
+            <line x1="3" y1="12" x2="3.01" y2="12" />
+            <line x1="3" y1="18" x2="3.01" y2="18" />
+        </svg>
+    );
+}
+
+function IconKanban() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <rect x="3" y="3" width="5" height="18" rx="1" />
+            <rect x="10" y="3" width="5" height="12" rx="1" />
+            <rect x="17" y="3" width="5" height="7" rx="1" />
+        </svg>
+    );
+}
+
+function IconBook() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+        </svg>
+    );
+}
+
+function IconUsers() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+            <path d="M16 3.13a4 4 0 010 7.75" />
+        </svg>
+    );
+}
+
+function IconChevronDown() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+            <polyline points="6 9 12 15 18 9" />
+        </svg>
+    );
+}
+
+function IconMenu() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+    );
+}
+
+function IconX() {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+    );
+}
+
+export default function AuthenticatedLayout({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    const { auth, currentWorkspace } = usePage<SharedProps>().props;
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+    const wsId = currentWorkspace?.id;
+    const wsName = currentWorkspace?.name ?? 'No workspace';
 
-    return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="flex h-16 justify-between">
-                        <div className="flex">
-                            <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
-                            </div>
+    const navItems: NavItem[] = [
+        {
+            label: 'Dashboard',
+            href: route('dashboard'),
+            routePattern: 'dashboard',
+            icon: <IconHome />,
+        },
+        ...(wsId
+            ? [
+                  {
+                      label: 'Initiatives',
+                      href: route('initiatives.index', { workspace: wsId }),
+                      routePattern: 'initiatives.*',
+                      icon: <IconList />,
+                  },
+                  {
+                      label: 'Kanban',
+                      href: route('initiatives.kanban', { workspace: wsId }),
+                      routePattern: 'initiatives.kanban',
+                      icon: <IconKanban />,
+                  },
+                  {
+                      label: 'Decisions',
+                      href: route('decisions.index', { workspace: wsId }),
+                      routePattern: 'decisions.*',
+                      icon: <IconBook />,
+                  },
+                  {
+                      label: 'Teams',
+                      href: route('teams.index', { workspace: wsId }),
+                      routePattern: 'teams.*',
+                      icon: <IconUsers />,
+                  },
+              ]
+            : []),
+    ];
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
+    function isActive(routePattern: string): boolean {
+        if (routePattern.endsWith('.*')) {
+            const prefix = routePattern.slice(0, -2);
+            return route().current(prefix + '.*') ?? false;
+        }
+        return route().current(routePattern) ?? false;
+    }
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
+    function handleLogout() {
+        router.post(route('logout'));
+    }
 
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
+    const SidebarContent = () => (
+        <div className="flex h-full flex-col">
+            {/* Logo */}
+            <div className="flex h-16 shrink-0 items-center border-b border-[#1E293B] px-6">
+                <Link href={route('dashboard')} className="flex items-center gap-2 focus:outline-none">
+                    <span className="text-lg font-bold tracking-tight text-white">
+                        Orquestra
+                    </span>
+                </Link>
+            </div>
 
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+            {/* Workspace badge */}
+            {currentWorkspace && (
+                <div className="mx-4 mt-4 rounded-md bg-[#1E293B] px-3 py-2">
+                    <p className="text-xs font-medium text-[#94A3B8]">Workspace</p>
+                    <p className="truncate text-sm font-semibold text-white">{wsName}</p>
                 </div>
-
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
-                    <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="border-t border-gray-200 pb-1 pt-4">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {header}
-                    </div>
-                </header>
             )}
 
-            <main>{children}</main>
+            {/* Nav */}
+            <nav className="flex-1 space-y-1 px-3 py-4">
+                {navItems.map((item) => {
+                    const active = isActive(item.routePattern);
+                    return (
+                        <Link
+                            key={item.label}
+                            href={item.href}
+                            onClick={() => setSidebarOpen(false)}
+                            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:ring-offset-2 focus:ring-offset-[#0F172A] ${
+                                active
+                                    ? 'bg-[#0369A1] text-white'
+                                    : 'text-[#94A3B8] hover:bg-[#1E293B] hover:text-white'
+                            }`}
+                        >
+                            {item.icon}
+                            {item.label}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* User section */}
+            <div className="border-t border-[#1E293B] p-4">
+                <div className="relative">
+                    <button
+                        type="button"
+                        onClick={() => setUserMenuOpen((v) => !v)}
+                        className="flex w-full cursor-pointer items-center gap-3 rounded-md px-2 py-2 text-left transition-colors hover:bg-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:ring-offset-2 focus:ring-offset-[#0F172A]"
+                        aria-label="User menu"
+                    >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0369A1] text-sm font-semibold text-white">
+                            {auth.user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-white">
+                                {auth.user.name}
+                            </p>
+                            <p className="truncate text-xs text-[#64748B]">
+                                {auth.user.email}
+                            </p>
+                        </div>
+                        <IconChevronDown />
+                    </button>
+
+                    {userMenuOpen && (
+                        <div className="absolute bottom-full left-0 right-0 mb-1 rounded-md border border-[#1E293B] bg-[#0F172A] py-1 shadow-lg">
+                            <Link
+                                href={route('profile.edit')}
+                                className="block px-4 py-2 text-sm text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-white focus:outline-none"
+                                onClick={() => setUserMenuOpen(false)}
+                            >
+                                Profile
+                            </Link>
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="block w-full cursor-pointer px-4 py-2 text-left text-sm text-[#94A3B8] transition-colors hover:bg-[#1E293B] hover:text-white focus:outline-none"
+                            >
+                                Sign out
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+            {/* Mobile overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 z-20 bg-black/50 lg:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Mobile sidebar drawer */}
+            <aside
+                className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-[#0F172A] transition-transform duration-200 ease-in-out lg:hidden ${
+                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
+                aria-label="Sidebar navigation"
+            >
+                <div className="absolute right-3 top-4">
+                    <button
+                        type="button"
+                        onClick={() => setSidebarOpen(false)}
+                        className="cursor-pointer rounded-md p-1 text-[#94A3B8] hover:text-white focus:outline-none"
+                        aria-label="Close sidebar"
+                    >
+                        <IconX />
+                    </button>
+                </div>
+                <SidebarContent />
+            </aside>
+
+            {/* Desktop sidebar */}
+            <aside className="hidden w-64 shrink-0 flex-col bg-[#0F172A] lg:flex">
+                <SidebarContent />
+            </aside>
+
+            {/* Main content */}
+            <div className="flex flex-1 flex-col overflow-hidden">
+                {/* Topbar */}
+                <header className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6">
+                    <div className="flex items-center gap-4">
+                        {/* Mobile menu toggle */}
+                        <button
+                            type="button"
+                            className="cursor-pointer rounded-md p-1 text-[#334155] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0369A1] lg:hidden"
+                            onClick={() => setSidebarOpen(true)}
+                            aria-label="Open sidebar"
+                        >
+                            <IconMenu />
+                        </button>
+                        {header && (
+                            <div className="text-sm font-medium text-[#0F172A]">
+                                {header}
+                            </div>
+                        )}
+                    </div>
+                </header>
+
+                {/* Page content */}
+                <main className="flex-1 overflow-y-auto p-6">
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }
