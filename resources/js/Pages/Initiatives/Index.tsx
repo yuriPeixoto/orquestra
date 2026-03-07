@@ -1,6 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
+
 interface Initiative {
     id: number;
     title: string;
@@ -33,10 +34,16 @@ export default function Index({ workspace, initiatives }: Props) {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            <div className="mb-4">
+                            <div className="mb-4 flex gap-3">
+                                <Link
+                                    href={route('initiatives.kanban', workspace.id)}
+                                    className="rounded border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                                >
+                                    Kanban
+                                </Link>
                                 <Link
                                     href={route('initiatives.create', workspace.id)}
-                                    className="rounded bg-blue-600 px-4 py-2 text-white"
+                                    className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                                 >
                                     Nova Iniciativa
                                 </Link>

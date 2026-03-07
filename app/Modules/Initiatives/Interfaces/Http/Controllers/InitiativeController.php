@@ -4,12 +4,15 @@ namespace App\Modules\Initiatives\Interfaces\Http\Controllers;
 
 use App\Modules\Initiatives\Application\Actions\CreateInitiative;
 use App\Modules\Initiatives\Application\Actions\UpdateInitiative;
+use App\Modules\Initiatives\Application\Actions\UpdateInitiativeStatus;
 use App\Modules\Initiatives\Domain\Enums\InitiativeStatus;
 use App\Modules\Initiatives\Infrastructure\Initiative;
 use App\Modules\Initiatives\Interfaces\Http\Requests\InitiativeRequest;
 use App\Modules\Workspaces\Infrastructure\Workspace;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -95,5 +98,33 @@ class InitiativeController extends Controller
 
         return redirect()->route('initiatives.show', [$workspace, $initiative])
             ->with('success', 'Iniciativa atualizada.');
+    }
+
+    public function kanban(Workspace $workspace): Response
+    {
+        $initiatives = $workspace->initiatives()
+            ->with('owner')
+            ->whereNotIn('status', [InitiativeStatus::Cancelled->value])
+            ->orderBy('due_date')
+            ->get();
+
+        return Inertia::render('Initiatives/Kanban', [
+            'workspace' => $workspace,
+            'initiatives' => $initiatives,
+        ]);
+    }
+
+    public function updateStatus(Request $request, Workspace $workspace, Initiative $initiative, UpdateInitiativeStatus $action): JsonResponse
+    {
+        abort_unless($initiative->workspace_id === $workspace->id, 404);
+        abort_unless($request->user()->can('edit_initiative'), 403);
+
+        $request->validate([
+            'status' => ['required', 'string', 'in:' . implode(',', array_column(InitiativeStatus::cases(), 'value'))],
+        ]);
+
+        $updated = $action->execute($initiative, InitiativeStatus::from($request->string('status')->toString()));
+
+        return response()->json(['status' => $updated->status->value]);
     }
 }
