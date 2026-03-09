@@ -49,7 +49,31 @@ Orquestra aims to centralize governance without increasing bureaucracy.
 
 ---
 
-## 5. Architecture Model
+## 5. Why Orquestra is Not a Task Manager
+
+This distinction is not cosmetic. It shapes every feature priority decision.
+
+A task manager answers: **what needs to be done?**
+Orquestra answers: **are we making good decisions, and can we prove it?**
+
+| Task Manager | Orquestra |
+|---|---|
+| Creates tasks, moves status | Tracks *why* a decision was made, who decided, what alternatives were considered |
+| Assigns work to people | Establishes decision authority and accountability per workspace |
+| Shows deadline vs. completion | Calculates initiative health: activity recency, open decisions, overdue governance |
+| Activity log is optional | Full audit trail is mandatory — every change is traceable via Spatie Activity Log |
+| Dashboard shows task counts | Governance reports: X decisions this quarter, Y unresolved, Z initiatives at risk |
+| No concept of process compliance | Compliance view: did this initiative follow the required governance checklist? |
+| Technical debt is invisible | Decisions and initiatives can be explicitly tagged as technical debt, with age tracking |
+| Kanban is the product | Kanban is the surface — governance intelligence is the product |
+
+The Kanban board exists because initiatives have statuses. But health scoring, decision lifecycle, process templates, audit trails, and governance reports are what make Orquestra a governance tool.
+
+The integration story reinforces this: a governance decision in Orquestra can generate a tracked work item in Aegis, which a client system (e.g., a Fleet Management platform) then consumes and acts on. Task managers don't close loops across systems.
+
+---
+
+## 6. Architecture Model
 
 **Architecture Style:** Modular Monolith
 
@@ -62,7 +86,7 @@ Orquestra aims to centralize governance without increasing bureaucracy.
 
 ---
 
-## 6. Multi-Tenant Strategy
+## 7. Multi-Tenant Strategy
 
 **Tenant Model:** Workspace-based isolation
 
@@ -75,7 +99,7 @@ No database-per-tenant strategy at this stage.
 
 ---
 
-## 7. Technology Stack
+## 8. Technology Stack
 
 ### Backend
 - Laravel 12
@@ -104,7 +128,7 @@ No database-per-tenant strategy at this stage.
 
 ---
 
-## 8. Initial Domain Modules
+## 9. Initial Domain Modules
 
 ```
 app/Modules/
@@ -125,7 +149,7 @@ Each module must:
 
 ---
 
-## 9. Initial MVP Scope (Phase 1)
+## 10. Initial MVP Scope (Phase 1)
 
 - User authentication
 - Workspace creation
@@ -139,7 +163,7 @@ Each module must:
 
 ---
 
-## 10. Documentation Standards
+## 11. Documentation Standards
 
 Orquestra follows documentation-first governance.
 
@@ -163,7 +187,7 @@ chore(scope): description
 
 ---
 
-## 11. Internationalization Policy
+## 12. Internationalization Policy
 
 - Interface prepared for i18n (pt-BR / en)
 - Primary documentation in English
@@ -172,7 +196,7 @@ chore(scope): description
 
 ---
 
-## 12. Guiding Principles
+## 13. Guiding Principles
 
 > Governance over improvisation.
 > Clarity over complexity.
@@ -182,4 +206,4 @@ chore(scope): description
 
 ---
 
-*Orquestra Base Document v0.1*
+*Orquestra Base Document v0.2 — updated 2026-03-09*
