@@ -99,8 +99,11 @@ Garante: design system coerente, WCAG AA, responsivo, 67 estilos, 96 paletas.
 
 ## Key Docs
 
-- `docs/vision.md` — product vision and principles
-- `docs/roadmap.md` — phase breakdown with issue numbers
+- `docs/vision.md` — product vision, principles, and **why this is not a task manager**
+- `docs/roadmap.md` — all phases with issue numbers (Phase 1–5 + long-term vision)
 - `docs/architecture.md` — architectural overview
-- `docs/adr/` — ADRs 001 (modular monolith) and 002 (layer conventions)
+- `docs/skills.md` — all available Claude Code skills with usage and examples
+- `docs/adr/001-modular-monolith.md` — ADR: modular monolith architecture
+- `docs/adr/002-module-layer-conventions.md` — ADR: layer responsibilities and naming
+- `docs/adr/003-root-route-is-login.md` — ADR: `/` redirects to login in Phase 1
 - `docs/portfolio-strategy.md` — broader portfolio context (personal reference)
